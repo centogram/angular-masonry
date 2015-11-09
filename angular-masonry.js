@@ -1,5 +1,5 @@
 /*!
- * angular-masonry 0.11.1
+ * angular-masonry 0.12.0
  * Pascal Hartig, weluse GmbH, http://weluse.de/
  * License: MIT
  */
@@ -47,7 +47,7 @@
         $element.addClass('loaded');
       }
       this.appendBrick = function appendBrick(element, id) {
-        if (destroyed) {
+        if (destroyed || !$element.masonry) {
           return;
         }
         function _append() {
@@ -82,7 +82,7 @@
         }
       };
       this.removeBrick = function removeBrick(id, element) {
-        if (destroyed) {
+        if (destroyed || !$element.masonry) {
           return;
         }
         delete bricks[id];
@@ -90,6 +90,8 @@
         this.scheduleMasonryOnce('layout');
       };
       this.destroy = function destroy() {
+        if (!$element.masonry)
+          return;
         destroyed = true;
         if ($element.data('masonry')) {
           // Gently uninitialize if still present
@@ -99,6 +101,8 @@
         bricks = {};
       };
       this.reload = function reload() {
+        if (!$element.masonry)
+          return;
         $element.masonry();
         $scope.$emit('masonry.reloaded');
       };
@@ -109,6 +113,8 @@
       controller: 'MasonryCtrl',
       link: {
         pre: function preLink(scope, element, attrs, ctrl) {
+          if (!element.masonry)
+            return;
           var attrOptions = scope.$eval(attrs.masonry || attrs.masonryOptions);
           var options = angular.extend({
               itemSelector: attrs.itemSelector || '.masonry-brick',
@@ -147,7 +153,6 @@
     return {
       restrict: 'AC',
       require: '^masonry',
-      //scope: true,
       link: {
         pre: function preLink(scope, element, attrs, ctrl) {
           var id = scope.$id, index;
